@@ -76,3 +76,5 @@ sudo docker run hello-world
 > **Nota:** Este comando descarga una imagen de prueba de Docker y ejecuta un contenedor simple. Deberemos ver un mensaje indicando que Docker está funcionando correctamente. Si este es el caso, ¡la instalación fue exitosa!
 
 ¡Nuestro entorno Docker ahora está listo para usarse! 🚀
+
+---
