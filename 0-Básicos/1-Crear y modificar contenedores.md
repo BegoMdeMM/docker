@@ -12,7 +12,7 @@ Además, aprenderemos a realizar operaciones básicas como listar imágenes, ver
 
 ## Pasos del ejemplo:
 
-1. Ejecutar un contenedor basado en la imagen `alpine` y asignarle el nombre `alpine_orig_cont`:
+1. **Ejecutar un contenedor basado en la imagen `alpine` y asignarle el nombre `alpine_orig_cont`:**
 ```
 docker run -it --name=alpine_orig_cont alpine /bin/sh
 ```
@@ -25,38 +25,45 @@ El contenedor ejecutará un shell interactivo (/bin/sh).
 - `alpine /bin/sh`: Usa la imagen alpine y ejecuta el shell /bin/sh.
 
 En este punto, tenemos un contenedor interactivo corriendo. Podemos ejecutar comandos dentro del contenedor.
-2. Dentro del contenedor, realizar algún cambio (por ejemplo, crear un archivo):
+
+2. **Dentro del contenedor, realizar algún cambio (por ejemplo, crear un archivo):**
 ```
 / # touch hello
 ```
 Salimos del contenedor sin detenerlo usando `Ctrl-P + Ctrl-Q`.
-3. Comprobar los contenedores en ejecución:
+
+3. **Comprobar los contenedores en ejecución:**
 ```
 docker ps
 ```
 Muestra una lista de contenedores que están corriendo. Podemos verificar que `alpine_orig_cont` sigue en ejecución.
-4. Crear una nueva imagen llamada `alpine_new` a partir del contenedor `alpine_orig_cont`:
+
+4. **Crear una nueva imagen llamada `alpine_new` a partir del contenedor `alpine_orig_cont`:**
 ```
 docker commit alpine_orig_cont alpine_new
 ```
 - `docker commit`: Crea una nueva imagen basada en el estado actual del contenedor.
 - `alpine_orig_cont`: El contenedor del que se crea la imagen.
 - `alpine_new`: Nombre de la nueva imagen.
-5. Ver las imágenes disponibles:
+
+5. **Ver las imágenes disponibles:**
 ```
 docker image ls
 ```
-6. Comparar las capas de la nueva imagen (`alpine_new`) con la imagen original (`alpine`):
+
+6. **Comparar las capas de la nueva imagen (`alpine_new`) con la imagen original (`alpine`):**
 ```
 docker history alpine_new
 docker history alpine
 ```
-7. Detener y eliminar el contenedor original:
+
+7. **Detener y eliminar el contenedor original:**
 ```
 docker stop alpine_orig_cont
 docker rm alpine_orig_cont
 ```
-8. Crear un nuevo contenedor basado en la imagen `alpine_new`:
+
+8. **Crear un nuevo contenedor basado en la imagen `alpine_new`:**
 ```
 docker run -it alpine_new /bin/sh
 ```
@@ -65,11 +72,13 @@ Dentro del nuevo contenedor, verificamos los cambios:
 / # ls
 ```
 Deberíamos ver el archivo hello creado en el paso 2.
-9. Salir del contenedor y verificar los contenedores detenidos:
+
+9. **Salir del contenedor y verificar los contenedores detenidos:**
 ```
 docker ps -a
 ```
-10. Eliminar el contenedor creado:
+
+10. **Eliminar el contenedor creado:**
 ```
 docker rm [nombre_del_contenedor]
 ```
