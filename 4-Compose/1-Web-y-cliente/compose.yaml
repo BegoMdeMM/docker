@@ -1,0 +1,80 @@
+name: compose_practica
+
+services:
+  inicializador:
+    image: alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+    environment:
+      APP_MESSAGE: ${APP_MESSAGE:-Mensaje predeterminado de Compose}
+    command:
+      - /bin/sh
+      - -c
+      - 'printf "%s\n" "$$APP_MESSAGE" > /datos/mensaje.txt'
+    volumes:
+      - datos_web:/datos
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  web:
+    build:
+      context: ./web
+    image: compose-web:1.0
+    depends_on:
+      inicializador:
+        condition: service_completed_successfully
+    volumes:
+      - type: volume
+        source: datos_web
+        target: /datos
+        read_only: true
+    networks:
+      - app_net
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+      interval: 2s
+      timeout: 1s
+      retries: 10
+      start_period: 2s
+
+  cliente:
+    image: alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+    user: "65534:65534"
+    depends_on:
+      web:
+        condition: service_healthy
+    command:
+      - /bin/sh
+      - -c
+      - 'trap "exit 0" TERM; while :; do sleep 1 & wait $$!; done'
+    volumes:
+      - type: volume
+        source: datos_web
+        target: /datos
+        read_only: true
+    networks:
+      - app_net
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+networks:
+  app_net:
+    internal: true
+
+volumes:
+  datos_web:
