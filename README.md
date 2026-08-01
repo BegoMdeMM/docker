@@ -116,4 +116,4 @@ Este es un laboratorio educativo. Los controles mostrados no sustituyen análisi
 
 ## Autoría
 
-Prácticas desarrolladas y verificadas por `BMdMM` como parte de un itinerario de aprendizaje en Docker, Linux, redes, DevSecOps y seguridad de contenedores.
+Prácticas ejecutadas, verificadas y documentadas por `BegoMdeMM`, conservando en el historial del repositorio las contribuciones colaborativas anteriores.
