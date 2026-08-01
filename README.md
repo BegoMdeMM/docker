@@ -1,80 +1,119 @@
-# Docker Intro
-## Configuración de Docker desde cero
+# Docker Labs
 
-Este documento describe cómo preparar un entorno Linux basado en Ubuntu dentro de una máquina virtual utilizando VirtualBox y configurar Docker desde cero.
+Laboratorio práctico y progresivo para aprender Docker mediante ejercicios ejecutados, verificados y documentados sobre imágenes, contenedores, almacenamiento, redes, Docker Compose y hardening básico.
 
----
+El repositorio conserva los resultados que se comprobaron realmente en el entorno de laboratorio. Los identificadores, direcciones IP, PID, tiempos y consumos son evidencias de una ejecución concreta, no valores universales.
 
-## Preparación del entorno
+## Entorno validado
 
-1.- **Sistema base:**
-   Usaremos una máquina virtual con Ubuntu como sistema operativo, ejecutándose en VirtualBox. 
-   
-   Asegúrate de que tu sistema esté actualizado y que tengas acceso como usuario con privilegios `sudo`.
+| Componente | Valor |
+|---|---|
+| Equipo | `WDkali-h61` |
+| Sistema | Kali GNU/Linux Rolling |
+| Docker Engine | `28.5.2+dfsg4` |
+| Docker Compose | `2.40.3-3` |
+| Almacenamiento | `overlay2` |
+| Imagen base principal | `alpine:3.24.1` fijada por digest en las construcciones |
 
-2.- **Verificar la versión de Ubuntu:**
-   Antes de instalar Docker, es importante saber qué versión (codename) de Ubuntu estás utilizando. Esto es útil para agregar los repositorios correctos más adelante.
-   ```sh
-   lsb_release -cs
-   ```
-   
-   ## Instalación de Docker
-1. **Configurar los repositorios de Docker**
+## Contenidos
 
-Primero, nos aseguramos de que los paquetes esenciales para la instalación estén disponibles en el sistema.
+### 0. Fundamentos
 
-```sh
-sudo apt-get update
-sudo apt-get install -y ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
+1. [Crear y modificar contenedores e imágenes](0-B%C3%A1sicos/1-Crear%20y%20modificar%20contenedores.md): `docker run`, cambios del sistema de archivos y comparación entre `docker commit` y una construcción declarativa.
+2. [Gestionar contenedores y estados](0-B%C3%A1sicos/2-Gestionar%20contenedores.md): estados, códigos de salida, renombrado y detención.
+3. [Inspección, logs y diagnóstico](0-B%C3%A1sicos/3-Inspecci%C3%B3n,%20logs%20y%20diagn%C3%B3stico%20de%20contenedores.md): logs, `inspect`, `top`, `stats` y metadatos.
+4. [Ciclo de vida e interacción avanzada](0-B%C3%A1sicos/4-Lanzamiento%20y%20gesti%C3%B3n%20avanzada%20de%20contenedores.md): `attach`, `exec`, `create`, pausa, reinicio, espera y señales.
+
+### 1. Imágenes reproducibles
+
+- [Dockerfile básico](1-Im%C3%A1genes/1-Dockerfile-basico/README.md): base fijada por digest, etiquetas OCI, contexto reducido, usuario sin privilegios, permisos, caché y capas.
+
+### 2. Almacenamiento
+
+- [Volúmenes y bind mounts](2-Almacenamiento/1-Volumenes-y-bind-mounts/README.md): persistencia, solo lectura, permisos, ciclo de vida y riesgos sobre rutas del host.
+
+### 3. Redes
+
+- [Aislamiento y DNS](3-Redes/1-Aislamiento-y-DNS/README.md): redes bridge, DNS interno, aislamiento y contenedores multirred.
+
+### 4. Docker Compose
+
+- [Aplicación web y cliente](4-Compose/1-Web-y-cliente/README.md): construcción local, tres servicios, dependencias, healthcheck, red interna, volumen, `.env` y endurecimiento.
+
+### 5. Seguridad
+
+- [Hardening básico](5-Seguridad/1-Hardening-basico/README.md): usuario no root, capacidades eliminadas, `no-new-privileges`, raíz de solo lectura, `tmpfs`, red y límites.
+
+## Progresión
+
+```text
+contenedor manual
+    ↓
+Dockerfile versionado
+    ↓
+persistencia de datos
+    ↓
+redes y DNS
+    ↓
+orquestación con Compose
+    ↓
+hardening y verificación
 ```
 
-Ahora, hay que descargar la clave GPG oficial de Docker para validar los paquetes firmados:
+## Inicio rápido
 
-```sh
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+Requisitos:
+
+- Docker Engine en ejecución;
+- Docker Compose v2 mediante `docker compose`;
+- permisos para comunicarse con el daemon;
+- utilidades estándar indicadas en cada práctica.
+
+```bash
+git clone https://github.com/BegoMdeMM/docker.git
+cd docker
+
+docker version
+docker compose version
 ```
 
-2. **Modificar el repositorio de APT**
+Cada práctica incluye objetivo, entorno validado, comandos, resultados observados, errores encontrados, verificaciones y limpieza explícita.
 
-Hay que modificar el archivo del repositorio de Docker:
+Para instalar Docker en otro equipo, consulta [la guía de referencia](docs/instalacion-docker.md) y las instrucciones oficiales enlazadas en ella.
 
-```sh
-sudo nano /etc/apt/sources.list.d/docker.list
+## Ejemplo con Docker Compose
+
+```bash
+cd 4-Compose/1-Web-y-cliente
+cp .env.example .env
+docker compose config --quiet
+docker compose up --build --detach --wait --wait-timeout 60
+docker compose ps --all
 ```
 
-Tenemos que agregar el siguiente contenido al archivo, reemplazando jammy con el codename de nuestra versión de Ubuntu (obtenido anteriormente con lsb_release -cs):
+Limpieza completa:
 
-```sh
-deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu jammy stable
+```bash
+docker compose down --volumes --remove-orphans
+docker image rm compose-web:1.0
 ```
 
-> **Nota:** Hemos comentado las líneas existentes en el archivo, las cuales apuntaban a otros repositorios de Docker, para evitar conflictos.
+Revisa siempre los objetivos antes de ejecutar operaciones de eliminación.
 
-3. **Instalar Docker**
+## Decisiones técnicas
 
-Lo primero que hemos hechi ha sido actualizar la lista de paquetes y realizar una actualización del sistema para garantizar la compatibilidad.
+- Se utiliza `--mount` para expresar origen, destino, tipo y modo.
+- Las imágenes construidas fijan versión y digest de la base.
+- Los procesos se ejecutan sin privilegios cuando su función lo permite.
+- Compose aplica `read_only`, `tmpfs`, `cap_drop` y `no-new-privileges`.
+- Las redes evitan subredes fijas cuando no son necesarias.
+- Los errores reales se conservan. El ejercicio Compose registra el fallo inicial al asumir que Alpine incluía `httpd` y su corrección.
+- No se provocan agotamientos de recursos ni se inventan resultados.
 
-```sh
-sudo apt-get update
-sudo apt-get upgrade -y
-```
+## Alcance
 
-Instalamos Docker y sus componentes adicionales:
+Este es un laboratorio educativo. Los controles mostrados no sustituyen análisis de vulnerabilidades, gestión de secretos, parcheado, autorización de aplicación, observabilidad centralizada, backups ni controles de producción.
 
-```sh
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-```
+## Autoría
 
-### Verificar la instalación
-Para asegurarnos de que Docker está correctamente instalado, ejecutamos el siguiente comando:
-
-```sh
-sudo docker run hello-world
-```
-
-> **Nota:** Este comando descarga una imagen de prueba de Docker y ejecuta un contenedor simple. Deberemos ver un mensaje indicando que Docker está funcionando correctamente. Si este es el caso, ¡la instalación fue exitosa!
-
-¡Nuestro entorno Docker ahora está listo para usarse! 🚀
-
----
+Prácticas desarrolladas y verificadas por `BMdMM` como parte de un itinerario de aprendizaje en Docker, Linux, redes, DevSecOps y seguridad de contenedores.

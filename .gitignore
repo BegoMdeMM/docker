@@ -1,0 +1,15 @@
+# Configuración local
+**/.env
+**/.env.*
+!**/.env.example
+
+# Editores
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
